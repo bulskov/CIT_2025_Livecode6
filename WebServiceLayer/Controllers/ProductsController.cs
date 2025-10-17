@@ -42,12 +42,16 @@ public class ProductsController : ControllerBase
             ? GetUrl(nameof(GetProducts), new { page = page + 1, pageSize })
             : null;
 
+        var first = GetUrl(nameof(GetProducts), new {page = 0, pageSize });
         var cur = GetUrl(nameof(GetProducts), new {page, pageSize });
+        var last  = GetUrl(nameof(GetProducts), new {page = numPages-1, pageSize });
 
         var result = new
         {
+            First = first,
             Prev = prev,
             Next = next,
+            Last = last,
             Current = cur,
             NumberOfPages=numPages,
             NumberOfIems = numOfItems,
