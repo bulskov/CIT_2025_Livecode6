@@ -4,6 +4,13 @@
 namespace DataServiceLayer;
 public class NorthwindContext : DbContext
 {
+    private readonly string? _connectionString;
+
+    public NorthwindContext(string? connectionString)
+    {
+        _connectionString = connectionString;
+    }
+
     public DbSet<Category> Categories { get; set; }
     public DbSet<Product> Products { get; set; }
 
@@ -11,7 +18,7 @@ public class NorthwindContext : DbContext
     {
         optionsBuilder.LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information);
         optionsBuilder.EnableSensitiveDataLogging();
-        optionsBuilder.UseNpgsql("host=localhost;db=northwind;uid=bulskov;pwd=henrik");
+        optionsBuilder.UseNpgsql(_connectionString);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

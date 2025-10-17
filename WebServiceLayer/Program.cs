@@ -6,14 +6,19 @@ namespace WebServiceLayer;
 
 public class Program
 { 
-    public static DataService DataService{ get; } = new DataService();
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        //var connectionString = builder.Configuration["connectionString"];
+
+        builder.Configuration.AddJsonFile("config.json");
+
+        var connectionString = builder.Configuration.GetSection("ConnectionString").Value;
+
         // Add services to the container.
 
-        builder.Services.AddSingleton<IDataService, DataService>();
+        builder.Services.AddSingleton<IDataService>(new DataService(connectionString));
 
         builder.Services.AddMapster();
 
