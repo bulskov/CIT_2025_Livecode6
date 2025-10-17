@@ -1,6 +1,7 @@
 ﻿using DataServiceLayer;
 using MapsterMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Reflection.Emit;
 using WebServiceLayer.Models;
 
@@ -8,57 +9,26 @@ namespace WebServiceLayer.Controllers;
 
 [Route("api/products")]
 [ApiController]
-public class ProductsController : ControllerBase
+public class ProductsController : BaseController
 {
-    private readonly IDataService _dataService;
-    private readonly LinkGenerator _generator;
-    private readonly IMapper _mapper;
-
     public ProductsController(
         IDataService dataService,
         LinkGenerator generator, 
-        IMapper mapper) 
+        IMapper mapper) : base(dataService, generator, mapper)
     {
-        _dataService = dataService;
-        _generator = generator;
-        _mapper = mapper;
+       
     }
 
     [HttpGet(Name = nameof(GetProducts))]
-    public IActionResult GetProducts(int page = 0, int pageSize = 5)
+    public IActionResult GetProducts([FromQuery] QueryParams queryParams)
     {
         var products = _dataService
-            .GetProducts(page, pageSize)
-            .Select(x => CreateProductModel(x));
+            .GetProducts(queryParams.Page, queryParams.PageSize)
+            .Select(x => CreateProductListModel(x));
 
         var numOfItems = _dataService.GetProductCount();
-        var numPages = (int)Math.Ceiling((double)numOfItems / pageSize);
 
-        var prev = page > 0
-            ? GetUrl(nameof(GetProducts), new { page = page - 1, pageSize })
-            : null;
-
-        var next = page < numPages-1
-            ? GetUrl(nameof(GetProducts), new { page = page + 1, pageSize })
-            : null;
-
-        var first = GetUrl(nameof(GetProducts), new {page = 0, pageSize });
-        var cur = GetUrl(nameof(GetProducts), new {page, pageSize });
-        var last  = GetUrl(nameof(GetProducts), new {page = numPages-1, pageSize });
-
-        var result = new
-        {
-            First = first,
-            Prev = prev,
-            Next = next,
-            Last = last,
-            Current = cur,
-            NumberOfPages=numPages,
-            NumberOfIems = numOfItems,
-            Items = products
-        };
-
-
+        var result = CreatePaging(nameof(GetProducts), products, numOfItems, queryParams);
 
         return Ok(result);
     }
@@ -76,6 +46,7 @@ public class ProductsController : ControllerBase
         return Ok(CreateProductModel(product));
     }
 
+
     private ProductModel CreateProductModel(Product product)
     {
         var model = _mapper.Map<ProductModel>(product);
@@ -84,8 +55,11 @@ public class ProductsController : ControllerBase
         return model;
     }
 
-    private string? GetUrl(string endpointName, object values)
+    private ProductListModel CreateProductListModel(Product product)
     {
-        return _generator.GetUriByName(HttpContext, endpointName, values);
+        var model = _mapper.Map<ProductListModel>(product);
+        model.Url = GetUrl(nameof(GetProduct), new { id = product.Id });
+        model.CategoryUrl = GetUrl(nameof(CategoriesController.GetCategory), new { product.Category.Id });
+        return model;
     }
 }

@@ -9,7 +9,6 @@ public class ProductModel
 
     public int UnitPrice { get; set; }
 
-
-    public string CategoryName { get; set; }
+     public string? CategoryName { get; set; }
     public string? CategoryUrl { get; set; }
 }

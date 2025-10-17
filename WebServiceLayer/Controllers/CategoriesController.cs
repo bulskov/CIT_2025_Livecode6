@@ -8,29 +8,30 @@ namespace WebServiceLayer.Controllers;
 
 [Route("api/categories")]
 [ApiController]
-public class CategoriesController : ControllerBase
+public class CategoriesController : BaseController
 {
-    private readonly IDataService _dataService;
-    private readonly LinkGenerator _generator;
-    private readonly IMapper _mapper;
 
     public CategoriesController(
         IDataService dataService,
         LinkGenerator generator,
-        IMapper mapper)
+        IMapper mapper) : base(dataService, generator, mapper)
     {
-        _dataService = dataService;
-        _generator = generator;
-        _mapper = mapper;
+       
     }
 
     [HttpGet(Name = nameof(GetCategories))]
-    public IActionResult GetCategories()
+    public IActionResult GetCategories([FromQuery] QueryParams queryParams)
     {
-        var categories = _dataService.GetCategories()
+        queryParams.PageSize = Math.Min(queryParams.PageSize, 3);
+
+        var categories = _dataService.GetCategories(queryParams.Page, queryParams.PageSize)
             .Select(x => CreateCategoryModel(x));
 
-        return Ok(categories);
+        var numOfItems = _dataService.GetCategoriesCount();
+
+        var result = CreatePaging(nameof(GetCategories), categories, numOfItems, queryParams);
+
+        return Ok(result);
     }
 
     [HttpGet("{id}", Name = nameof(GetCategory))]
@@ -76,10 +77,5 @@ public class CategoriesController : ControllerBase
         var model = _mapper.Map<CategoryModel>(category);
         model.Url = GetUrl(nameof(GetCategory), new { id = category.Id });
         return model;
-    }
-
-    private string? GetUrl(string endpointName, object values)
-    {
-        return _generator.GetUriByName(HttpContext, endpointName, values);
     }
 }

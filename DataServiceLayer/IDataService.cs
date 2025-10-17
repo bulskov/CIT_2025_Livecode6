@@ -6,7 +6,8 @@ public interface IDataService
     // Categories
     /////////////////////////////////////////////////
 
-    IList<Category> GetCategories();
+    int GetCategoriesCount();
+    IList<Category> GetCategories(int page, int pageSize);
     Category? GetCategory(int id);
     void CreateCategory(Category category);
     bool UpdateCategory(Category category);

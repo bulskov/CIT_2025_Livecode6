@@ -9,10 +9,19 @@ public class DataService : IDataService
     // Categories
     /////////////////////////////////////////////////
 
-    public IList<Category> GetCategories()
+    public int GetCategoriesCount()
+    {
+        var db = new NorthwindContext();
+        return db.Categories.Count();
+    }
+
+    public IList<Category> GetCategories(int page, int pageSize)
     {
         var db = new NorthwindContext();
         return db.Categories
+            .OrderBy(x => x.Id)
+            .Skip(page * pageSize)
+            .Take(pageSize)
             .ToList();
     }
 
