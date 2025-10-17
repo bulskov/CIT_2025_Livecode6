@@ -31,3 +31,8 @@ GET {{WebServer_HostAddress}}/api/products
 Accept: application/json
 
 ###
+
+GET {{WebServer_HostAddress}}/api/products/1
+Accept: application/json
+
+###
