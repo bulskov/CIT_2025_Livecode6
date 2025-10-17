@@ -58,11 +58,22 @@ public class DataService : IDataService
     /////////////////////////////////////////////////
     // Products
     /////////////////////////////////////////////////
-    
-    public IList<Product> GetProducts()
+
+    public int GetProductCount()
     {
         var db = new NorthwindContext();
-        return db.Products.Include(x => x.Category).ToList();
+        return db.Products.Count();
+    }
+
+    public IList<Product> GetProducts(int page, int pageSize)
+    {
+        var db = new NorthwindContext();
+        return db.Products
+            .Include(x => x.Category)
+            .OrderBy(x => x.Id)
+            .Skip(page* pageSize)
+            .Take(pageSize)
+            .ToList();
     }
 
     public Product? GetProduct(int id)

@@ -24,13 +24,39 @@ public class ProductsController : ControllerBase
         _mapper = mapper;
     }
 
-    [HttpGet]
-    public IActionResult GetProducts()
+    [HttpGet(Name = nameof(GetProducts))]
+    public IActionResult GetProducts(int page = 0, int pageSize = 5)
     {
         var products = _dataService
-            .GetProducts()
+            .GetProducts(page, pageSize)
             .Select(x => CreateProductModel(x));
-        return Ok(products);
+
+        var numOfItems = _dataService.GetProductCount();
+        var numPages = (int)Math.Ceiling((double)numOfItems / pageSize);
+
+        var prev = page > 0
+            ? GetUrl(nameof(GetProducts), new { page = page - 1, pageSize })
+            : null;
+
+        var next = page < numPages-1
+            ? GetUrl(nameof(GetProducts), new { page = page + 1, pageSize })
+            : null;
+
+        var cur = GetUrl(nameof(GetProducts), new {page, pageSize });
+
+        var result = new
+        {
+            Prev = prev,
+            Next = next,
+            Current = cur,
+            NumberOfPages=numPages,
+            NumberOfIems = numOfItems,
+            Items = products
+        };
+
+
+
+        return Ok(result);
     }
 
     

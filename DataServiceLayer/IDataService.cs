@@ -17,8 +17,9 @@ public interface IDataService
     // Products
     /////////////////////////////////////////////////
 
+    int GetProductCount();
     Product? GetProduct(int id);
-    IList<Product> GetProducts();
+    IList<Product> GetProducts(int page, int pageSize);
     IList<ProductSearchModel> GetProductByName(string search);
     IList<Category> GetCategoriesByName(string name);
 }
